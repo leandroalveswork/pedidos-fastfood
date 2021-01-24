@@ -1,0 +1,150 @@
+section ul {
+    padding: 10px;
+    list-style-type: none;
+    margin: 0;
+}
+
+section li {
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: white;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    border-bottom: 4px solid rgb(228, 228, 228);
+}
+
+section li div:nth-child(1) {
+    width: 40%;
+}
+section li div:nth-child(2) {
+    width: 60%;
+}
+
+section li div {
+    margin-bottom: 5px;
+}
+
+section li button {
+    background-color: white;
+    border: 2px solid rgb(68, 68, 68);
+    color:rgb(68, 68, 68);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    padding-right: 12px;
+    transition-duration: 200ms;
+}
+
+button:hover {
+    border: 2px solid rgb(165, 165, 165);
+    color:rgb(165, 165, 165);
+    transition-duration: 200ms;
+}
+
+button:focus,
+select:focus {
+    outline: none;
+}
+
+button:active {
+    border: 2px solid rgb(213, 213, 213);
+    color:rgb(213, 213, 213);
+}
+
+li p {
+    margin: 0;
+}
+
+section ul li:nth-last-child(1) {
+    margin-bottom: 0;
+}
+
+.wrapBold {
+    display: flex;
+    flex-direction: column;
+}
+
+.wrapBold:nth-child(1) {
+    margin-bottom: 5px;
+}
+
+.pedidosSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.createBtn {
+    background-color: white;
+    border: 2px solid rgb(68, 68, 68);
+    color: rgb(68, 68, 68);
+    border-radius: 5px;
+    margin: 0 10px;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    transition-duration: 200ms;
+}
+
+.adminBtn {
+    background-color: inherit;
+    border: none;
+    color: rgb(68, 68, 68);
+    margin-top: 50px;
+}
+
+.adminBtn:hover {
+    border: none;
+    color: rgb(68, 68, 68);
+    border-bottom: 1px solid rgb(68, 68, 68);
+}
+
+section button.adminBtn {
+    align-self: center;
+}
+
+@media (min-width: 375px) {
+    .createBtn {
+        align-self: center;
+        padding: 5px 15px;
+    }
+}
+
+@media (min-width: 576px) {
+    .wrapBold {
+        flex-direction: row;
+    }
+
+    .wrapBold b {
+        margin-right: 20px;
+    }
+}
+
+@media (min-width: 768px) {
+    section li div:nth-child(1) {
+        width: auto;
+    }
+
+    section li div:nth-child(2) {
+        width: auto;
+        flex-grow: 1;
+        padding-left: 20px;
+    }
+
+    section li button {
+        align-self: center;
+    }
+
+    section li {
+        margin-left: 0;
+    }
+
+    section ul {
+        width: 768px;
+    }
+
+    section {
+        display: flex;
+        align-items: center;
+    }
+}

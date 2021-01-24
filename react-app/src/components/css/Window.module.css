@@ -1,0 +1,109 @@
+.postSection {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.formDiv {
+    background-color: white;
+    padding: 5px;
+    border-bottom: 4px solid rgb(228, 228, 228);
+    display: flex;
+    flex-direction: column;
+}
+
+.btnBack {
+    background-color: white;
+    border: 2px solid rgb(68, 68, 68);
+    color:rgb(68, 68, 68);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+    padding-right: 12px;
+    transition-duration: 200ms;
+    margin-bottom: 10px;
+}
+
+.btnCreate {
+    background-color: white;
+    border: 2px solid rgb(68, 68, 68);
+    color:rgb(68, 68, 68);
+    border-radius: 5px;
+    padding: 5px 12px;
+    margin-top: 20px;
+    align-self: center;
+    display: flex;
+    justify-content: center;
+    transition-duration: 200ms;
+}
+
+.formDiv p {
+    margin: 0 0 5px 0;
+}
+
+.formDiv > * {
+    margin-bottom: 5px;
+}
+
+.formDiv button {
+    margin-bottom: 0;
+}
+
+.formDiv select {
+    background-color: white;
+    border: 0;
+    border-bottom: 2px solid rgb(68, 68, 68);
+    color:rgb(68, 68, 68);
+    padding: 5px;
+    padding-left: 0;
+    display: flex;
+    justify-content: center;
+    transition-duration: 200ms;
+}
+
+.formDiv select:hover {
+    border-bottom: 2px solid rgb(165, 165, 165);
+    color:rgb(165, 165, 165);
+    transition-duration: 200ms;
+}
+
+.formDiv select option {
+    color: rgb(68, 68, 68);
+}
+
+.wrapInput {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 375px) {
+    .wrapInput {
+        flex-direction: row;
+    }
+
+    .wrapInput p {
+        margin-right: 20px;
+    }
+
+    .wrapInput select {
+        flex-grow: 1;
+    }
+}
+
+@media (min-width: 576px) {
+    .formDiv {
+        align-self: center;
+        padding: 5px 35px;
+        position: absolute;
+        top: 10px;
+    }
+
+    .wrapInput select {
+        width: 200px;
+    }
+
+    .postSection {
+        position: relative;
+    }
+}
