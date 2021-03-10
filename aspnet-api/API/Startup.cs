@@ -44,7 +44,8 @@ namespace API
             });
             services.AddControllers();
             services.AddDbContext<FastFoodContext>(options => {
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("API"));
+                options.UseInMemoryDatabase("name");
+                // options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("API"));
             });
             services.AddScoped<IPedidoService, PedidoService>();
             services.AddScoped<IPedidoRepository, PedidoRepository>();

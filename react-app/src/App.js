@@ -7,6 +7,7 @@ import generateRandomCode from './helpers/GenerateRandomCode';
 import css from './components/css/Main.module.css'
 
 export default function App() {
+  const TIME_INTERVAL = 3000
 
   const [refreshInterval, setRefreshInterval] = React.useState({});
   const [filteredPedidos, setFilteredPedidos] = React.useState([]);
@@ -19,16 +20,23 @@ export default function App() {
   })
 
   React.useEffect(() => {
+    console.log('fui chamado!')
     if (userId === '') {
       clearInterval(refreshInterval);
+      (async () => {
+        setFilteredPedidos((await fetchJson()).sort((a, b) => a.posicao - b.posicao));
+      })()
       setRefreshInterval(setInterval(async () => {
-        setFilteredPedidos(await fetchJson());
-      }, 3000))
+        setFilteredPedidos((await fetchJson()).sort((a, b) => a.posicao - b.posicao));
+      }, TIME_INTERVAL))
     } else {
       clearInterval(refreshInterval);
+      (async () => {
+        setFilteredPedidos((await fetchJsonFiltered(userId)).sort((a, b) => a.posicao - b.posicao));
+      })()
       setRefreshInterval(setInterval(async () => {
-        setFilteredPedidos(await fetchJsonFiltered(userId));
-      }, 3000))
+        setFilteredPedidos((await fetchJsonFiltered(userId)).sort((a, b) => a.posicao - b.posicao));
+      }, TIME_INTERVAL))
     }
   }, [userId])
 
@@ -50,11 +58,13 @@ export default function App() {
   const handlePostPedido = async (pedido) => {
     const response = await postPedido(pedido);
     console.log(filteredPedidos)
+    console.log(response)
+    const pedidoReturned = response.data
     setFilteredPedidos([...filteredPedidos, {
-      id: pedido.id,
-      posicao: pedido.posicao,
-      lanche: pedido.lanche,
-      bebida: pedido.bebida
+      id: pedidoReturned.id,
+      posicao: pedidoReturned.posicao,
+      lanche: pedidoReturned.lanche,
+      bebida: pedidoReturned.bebida
     }]);
     changeWindow(false);
   }
