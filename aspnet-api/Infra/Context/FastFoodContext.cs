@@ -3,7 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspnetApi.Infra.Context {
     public class FastFoodContext : DbContext {
-        public FastFoodContext (DbContextOptions<FastFoodContext> options) : base (options) { }
+
+        private bool testEnv;
+
+        public FastFoodContext() {
+            testEnv = true;
+        }
+        public FastFoodContext (DbContextOptions<FastFoodContext> options) : base (options) {
+            testEnv = false;
+        }
         public DbSet<Pedido> Pedidos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -17,6 +25,12 @@ namespace AspnetApi.Infra.Context {
             builder.Entity<Pedido>().Property(x => x.Posicao).IsRequired();
             builder.Entity<Pedido>().Property(x => x.Lanche).IsRequired();
             builder.Entity<Pedido>().Property(x => x.Bebida).IsRequired();
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder opt) {
+            if (testEnv) {
+                opt.UseInMemoryDatabase("name");
+            }
         }
     }
 }
