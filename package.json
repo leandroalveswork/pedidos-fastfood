@@ -1,0 +1,26 @@
+{
+  "name": "pedidos-fastfood",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "startfront": "cd react-app && yarn && yarn start",
+    "startback": "dotnet run --project .\\aspnet-api\\API\\API.csproj",
+    "start": "concurrently 'npm:startback' 'npm:startfront'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leandroalveswork/pedidos-fastfood.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leandroalveswork/pedidos-fastfood/issues"
+  },
+  "homepage": "https://github.com/leandroalveswork/pedidos-fastfood#readme",
+  "dependencies": {
+    "concurrently": "^6.0.2"
+  }
+}

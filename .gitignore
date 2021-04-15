@@ -45,3 +45,7 @@ react-app/yarn-debug.log*
 react-app/yarn-error.log*
 
 react-app/.eslintcache
+react-app/debug.log*
+
+### BUILD
+node_modules/

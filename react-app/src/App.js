@@ -20,7 +20,6 @@ export default function App() {
   })
 
   React.useEffect(() => {
-    console.log('fui chamado!')
     if (userId === '') {
       clearInterval(refreshInterval);
       (async () => {
@@ -57,8 +56,6 @@ export default function App() {
 
   const handlePostPedido = async (pedido) => {
     const response = await postPedido(pedido);
-    console.log(filteredPedidos)
-    console.log(response)
     const pedidoReturned = response.data
     setFilteredPedidos([...filteredPedidos, {
       id: pedidoReturned.id,

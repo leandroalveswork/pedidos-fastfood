@@ -37,9 +37,9 @@ namespace PedidosTest
                 _service = new PedidoService(_repository);
                 _controller = new PedidosController(_service);
 
-                postItem = new PostPedido("0123-4567", "Cheeseburger", "Coquinha");
-                postItem2 = new PostPedido("0123-4567", "Cheeseburger", "Pepsi");
-                postItem3 = new PostPedido("0123-4567", "X-Bacon", "Guaraná");
+                postItem = new PostPedido(){SolicitanteId = "0123-4567", Lanche = "Cheeseburger", Bebida = "Coquinha"};
+                postItem2 = new PostPedido(){SolicitanteId = "0123-4567", Lanche = "Cheeseburger", Bebida = "Pepsi"};
+                postItem3 = new PostPedido(){SolicitanteId = "0123-4567", Lanche = "X-Bacon", Bebida = "Guaraná"};
                 _res1 = _controller.Post(postItem);
                 _res2 = _controller.Post(postItem2);
                 _res3 = _controller.Post(postItem3);
@@ -51,7 +51,7 @@ namespace PedidosTest
         {
             // Arrange
             Initialize();
-            var postItem4 = new PostPedido("0123-4567", "Sanduíche de presunto", "Fanta uva");
+            var postItem4 = new PostPedido(){SolicitanteId = "0123-4567", Lanche = "Sanduíche de presunto", Bebida = "Fanta uva"};
 
             // Act
             var result = _controller.Post(postItem4);
@@ -99,7 +99,7 @@ namespace PedidosTest
         {
             // Arrange
             Initialize();
-            var postItem4 = new PostPedido("0000-4567", "Sanduíche de presunto", "Fanta uva");
+            var postItem4 = new PostPedido(){SolicitanteId = "0000-4567", Lanche = "Sanduíche de presunto", Bebida = "Fanta uva"};
             var _res4 = _controller.Post(postItem4);
 
             // Act
