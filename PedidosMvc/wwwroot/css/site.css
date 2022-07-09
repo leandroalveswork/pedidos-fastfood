@@ -1,0 +1,75 @@
+:root {
+  --pfast-nav: rgb(58, 47, 122);
+  --pfast-form: rgb(149, 136, 226);
+  --pfast-btn-1: rgb(40, 168, 128);
+  --pfast-btn-2: rgb(107, 241, 165);
+  --pfast-error: rgb(168, 40, 59);
+}
+
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+.bg-pfast-nav {
+  background-color: var(--pfast-nav);
+}
+
+.bg-pfast-form {
+  background-color: var(--pfast-form);
+}
+
+.bg-pfast-btn-1 {
+  background-color: var(--pfast-btn-1);
+}
+
+.bg-pfast-btn-2 {
+  background-color: var(--pfast-btn-2);
+}
+
+.btn-tamanho-minimo-0_5 {
+  min-width: 3.0rem;
+}
+
+.btn-tamanho-minimo {
+  min-width: 6.0rem;
+}
+
+.btn-tamanho-minimo-1_5x {
+  min-width: 9.0rem;
+}
+
+.btn-tamanho-minimo-2_0x {
+  min-width: 12.0rem;
+}
+
+.btn-tamanho-minimo-2_5x {
+  min-width: 15.0rem;
+}
+
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.pfast-scroller {
+  overflow-x: auto;
+}
+
+.icone-grande {
+  font-size: 5.0rem;
+}

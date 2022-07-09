@@ -1,0 +1,241 @@
+@using System.Text.Json
+@using PedidosMvc.Domain.Model.ViewModel.Lanche;
+@model PesquisaRealizadaLancheViewModel;
+
+@{
+    ViewData["Title"] = "Lanche";
+    var ultimaViewModelSerializada = JsonSerializer.Serialize(Model);
+}
+
+<section>
+    <h2><i class='bi bi-inbox px-1'></i>Lanche</h2>
+</section>
+
+<section class='bg-pfast-form mt-3'>
+    <div class='d-flex justify-content-between p-2'>
+        <h3 class='m-0'>Filtros</h3>
+        <button class='border-0 bg-pfast-form' type='button' data-bs-toggle='collapse' data-bs-target='#filtros'><i class='bi bi-list px-1'></i></button>
+    </div>
+    <div class='collapse show' id='filtros'>
+        <div class='row g-0'>
+            <div class='col-12 col-sm-8 col-md-6 p-2 d-flex flex-column'>
+                <label>Nome</label>
+                <input asp-for='nome' />
+            </div>
+            <div class='col-12 col-sm-8 col-md-6 p-2 row g-0 d-flex align-items-center border border-2 border-dark'>
+                <label class='col-6'>Valor Un. Sugerido (R$)</label>
+                <div class='col-3 p-2 d-flex flex-column'>
+                    <label>Desde:</label>
+                    <input asp-for='valorUnidadeSugeridoMinimo' />
+                </div>
+                <div class='col-3 p-2 d-flex flex-column'>
+                    <label>Até:</label>
+                    <input asp-for='valorUnidadeSugeridoMaximo' />
+                </div>
+            </div>
+            <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+                <label>Ativo</label>
+                <select id='estaAtivo'>
+                    <option value='null'>Selecione...</option>
+                    <option value='true'>Sim</option>
+                    <option value='false'>Não</option>
+                </select>
+            </div>
+            <div class='col-12 row g-0 d-flex justify-content-end'>
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                    <button class='border-0 bg-pfast-btn-2 p-2 w-100' type='button' onclick='limparFiltros();' ><i class='bi bi-backspace px-1'></i>Limpar</button>
+                </div>
+                
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                    <button class='border-0 bg-pfast-btn-1 p-2 w-100 text-white' type='button' onclick='postPesquisaFormulario();' ><i class='bi bi-search px-1'></i>Pesquisar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class='mt-3 pfast-scroller'>
+    <table class='w-100'>
+        <thead class='w-100' id='cabecalhoLanche'>
+            
+        </thead>
+        <tbody class='w-100' id='resultadosLanche'>
+            
+        </tbody>
+    </table>
+    <div id='numeracaoPagina' class='mt-2 d-flex justify-content-center'>
+
+    </div>
+</section>
+
+<section class='mt-3 pfast-scroller row g-0 d-flex justify-content-end'>
+    <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+        <button class='border-0 bg-pfast-btn-1 text-white p-2 w-100' type='button' onclick='navegarPara("/Lanche/Incluir");' ><i class='bi bi-plus-lg px-1'></i>Novo</button>
+    </div>
+</section>
+
+@section Scripts {
+    <script src='@Url.Content("~/js/inputs.js")' asp-append-version="true"></script>
+    <script>
+
+        const limparFiltros = () => {
+            $('#nome').val('');
+            $('#valorUnidadeSugeridoMinimo').val('');
+            $('#valorUnidadeSugeridoMaximo').val('');
+            $('#estaAtivo').val('null');
+        };
+
+        const renderizarCabecalho = () => {
+            let htmlCabecalho = '';
+            htmlCabecalho += `<tr class='w-100'>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo-1_5x cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(0);'>Nome<i class="bi ${montarIcone(0, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo-2_5x cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(1);'>Valor Un. Sugerido (R$)<i class="bi ${montarIcone(1, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(2);'>Ativo<i class="bi ${montarIcone(2, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo'>...</th>`;
+            htmlCabecalho += `</tr>`;
+            $('#cabecalhoLanche').html(htmlCabecalho);
+        }
+
+        const renderizarResultados = () => {
+            let htmlResultados = '';
+            if (ultimaViewModel.resultados.length == 0) {
+                htmlResultados += "<tr class='border-top border-2 w-100'>";
+                htmlResultados += "    <td colspan='4' class='p-2 text-center'>Nenhum resultado</td>";
+                htmlResultados += "</tr>";
+            } else {
+                ultimaViewModel.resultados.forEach(lanche => {
+                    htmlResultados += `<tr class='w-100'>`;
+                    htmlResultados += `    <td class='p-2 border-2'>${lanche.nome}</td>`;
+                    htmlResultados += `    <td class='p-2 border-2'>${lanche.valorUnidadeSugerido.toFixed(2).replace('.', ',')}</td>`;
+                    if (lanche.estaAtivo) {
+                        htmlResultados += `    <td class='p-2 border-2'><i class='bi bi-check-square-fill cursor-pointer' onclick='confirmarModal.setCallbackAposSim(() => { postRequestRedirectAposOk("${urlInativar}?id=${lanche.id}", {}, "/Lanche"); });confirmarModal.dispararConfirmacao("Atenção!", "Deseja inativar esse lanche?");'></i></td>`;
+                    } else {
+                        htmlResultados += `    <td class='p-2 border-2'><i class='bi bi-square cursor-pointer' onclick='confirmarModal.setCallbackAposSim(() => { postRequestRedirectAposOk("${urlAtivar}?id=${lanche.id}", {}, "/Lanche"); });confirmarModal.dispararConfirmacao("Atenção!", "Deseja ativar esse lanche?");'></i></td>`;
+                    }
+                    htmlResultados += `    <td class='p-2 border-2'>`;
+                    htmlResultados += `        <div class='d-flex justify-content-around'>`;
+                    htmlResultados += `            <i class='bi bi-pencil-fill px-1 text-primary cursor-pointer' onclick='navegarPara("/Lanche/Alterar?id=${lanche.id}")'></i>`;
+                    htmlResultados += `            <i class='bi bi-trash-fill px-1 text-danger cursor-pointer' onclick='confirmarModal.setCallbackAposSim(() => { postRequestRedirectAposOk("${urlExcluir}?id=${lanche.id}", {}, "/Lanche"); });confirmarModal.dispararConfirmacao("Atenção!", "Deseja excluir esse lanche?");'></i>`;
+                    htmlResultados += `        </div>`;
+                    htmlResultados += `    </td>`;
+                    htmlResultados += `</tr>`;
+                });
+            }
+            $('#resultadosLanche').html(htmlResultados);
+        }
+
+        const renderizarNumeracao = () => {
+            let numerosPaginas = listarNumeracoes(ultimaViewModel.paginacaoRealizada.paginaAtual, ultimaViewModel.paginacaoRealizada.totalPaginas);
+            let htmlNumeracao = '';
+            numerosPaginas.forEach((numero, index) => {
+                let marginStart = '';
+                if (index > 0) {
+                    marginStart = ' ms-2';
+                }
+                if (numero === ultimaViewModel.paginacaoRealizada.paginaAtual) {
+                    htmlNumeracao += `<button type='button' class='border-0 bg-pfast-nav text-white btn-tamanho-minimo-0_5${marginStart}' >${numero}</button>`;
+                } else {
+                    htmlNumeracao += `<button type='button' class='border border-2 border-dark bg-white btn-tamanho-minimo-0_5${marginStart}' onclick='postPesquisaNumeracao(${numero});' >${numero}</button>`;
+                }
+            });
+            $('#numeracaoPagina').html(htmlNumeracao);
+        }
+
+        const postPesquisa = (formDto) => {
+            loadingModal.bloquearUi();
+            let requestPesquisar = postRequest('@Url.Action("Pesquisar", "Lanche")', formDto);
+            requestPesquisar.done((jsonResult) => {
+                let viewModel = jsonResult.retorno;
+                $('#nome').val(viewModel.nome);
+                $('#valorUnidadeSugeridoMinimo').val(viewModel.valorUnidadeSugeridoMinimo != null ? viewModel.valorUnidadeSugeridoMinimo.toFixed(2).replace('.', ',') : '');
+                $('#valorUnidadeSugeridoMaximo').val(viewModel.valorUnidadeSugeridoMaximo != null ? viewModel.valorUnidadeSugeridoMaximo.toFixed(2).replace('.', ',') : '');
+                $('#estaAtivo').val(viewModel.estaAtivo != null ? (viewModel.estaAtivo ? 'true' : 'false') : 'null');
+                ultimaViewModel = viewModel;
+                renderizarCabecalho();
+                renderizarResultados();
+                renderizarNumeracao();
+                loadingModal.desbloquearUi();
+            });
+        };
+
+        const postPesquisaFormulario = () => {
+            @* if (inputValorUnidadeSugeridoMinimo.foiInformadoIncorretamente()) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', 'Dinheiro mínimo inválido.');
+                return;
+            }
+            if (inputValorUnidadeSugeridoMaximo.foiInformadoIncorretamente()) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', 'Dinheiro máximo inválido.');
+                return;
+            } *@
+            if (inputValorUnidadeSugeridoMinimo.foiInformado() && inputValorUnidadeSugeridoMaximo.foiInformado() && inputValorUnidadeSugeridoMinimo.valorExato() > inputValorUnidadeSugeridoMaximo.valorExato()) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', 'Intervalo de Dinheiro inválido.');
+                return;
+            }
+            let formDto = {
+                nome: $('#nome').val(),
+                paginacaoPesquisaDto: {
+                    paginaAtual: 1,
+                    indiceColunaAOrdenar : 0,
+                    ehOrdenacaoCrescente: true
+                }
+            }
+            formDto.valorUnidadeSugeridoMinimo = inputValorUnidadeSugeridoMinimo.foiInformado() ? inputValorUnidadeSugeridoMinimo.valorExato() : null;
+            formDto.valorUnidadeSugeridoMaximo = inputValorUnidadeSugeridoMaximo.foiInformado() ? inputValorUnidadeSugeridoMaximo.valorExato() : null;
+            formDto.estaAtivo = $('#estaAtivo').val() != 'null' ? $('#estaAtivo').val() == 'true' : null
+            postPesquisa(formDto);
+        }
+
+        const postPesquisaOrdenacaoInvertida = (indColuna) => {
+            let formDto = {
+                nome: ultimaViewModel.nome,
+                valorUnidadeSugeridoMinimo: ultimaViewModel.valorUnidadeSugeridoMinimo,
+                valorUnidadeSugeridoMaximo: ultimaViewModel.valorUnidadeSugeridoMaximo,
+                estaAtivo: ultimaViewModel.estaAtivo,
+                paginacaoPesquisaDto: {
+                    paginaAtual: ultimaViewModel.paginacaoRealizada.paginaAtual
+                }
+            }
+            formDto.paginacaoPesquisaDto.ehOrdenacaoCrescente = (indColuna != ultimaViewModel.paginacaoRealizada.indiceColunaAOrdenar || !ultimaViewModel.paginacaoRealizada.ehOrdenacaoCrescente);
+            formDto.paginacaoPesquisaDto.indiceColunaAOrdenar = indColuna;
+            postPesquisa(formDto);
+        }
+
+        const postPesquisaNumeracao = (numeroPagina) => {
+            let formDto = {
+                nome: ultimaViewModel.nome,
+                valorUnidadeSugeridoMinimo: ultimaViewModel.valorUnidadeSugeridoMinimo,
+                valorUnidadeSugeridoMaximo: ultimaViewModel.valorUnidadeSugeridoMaximo,
+                estaAtivo: ultimaViewModel.estaAtivo,
+                paginacaoPesquisaDto: {
+                    paginaAtual: numeroPagina,
+                    ehOrdenacaoCrescente: ultimaViewModel.paginacaoRealizada.ehOrdenacaoCrescente,
+                    indiceColunaAOrdenar: ultimaViewModel.paginacaoRealizada.indiceColunaAOrdenar
+                }
+            }
+            postPesquisa(formDto);
+        }
+
+        const iniciar = () => {
+            ultimaViewModel = JSON.parse('@ultimaViewModelSerializada'.replaceAll('&quot;', '"'));
+            aplicarInputmaskDinheiro('#valorUnidadeSugeridoMinimo, #valorUnidadeSugeridoMaximo');
+            $('#nome').val(ultimaViewModel.nome);
+            $('#valorUnidadeSugeridoMinimo').val(ultimaViewModel.valorUnidadeSugeridoMinimo != null ? ultimaViewModel.valorUnidadeSugeridoMinimo.toFixed(2).replace('.', ',') : '');
+            $('#valorUnidadeSugeridoMaximo').val(ultimaViewModel.valorUnidadeSugeridoMaximo != null ? ultimaViewModel.valorUnidadeSugeridoMaximo.toFixed(2).replace('.', ',') : '');
+            $('#estaAtivo').val(ultimaViewModel.estaAtivo != null ? (ultimaViewModel.estaAtivo ? 'true' : 'false') : 'null');
+            renderizarCabecalho();
+            renderizarResultados();
+            renderizarNumeracao();
+        };
+
+        $(window).on('load', iniciar);
+        const inputValorUnidadeSugeridoMinimo = new InputDinheiro('#valorUnidadeSugeridoMinimo');
+        const inputValorUnidadeSugeridoMaximo = new InputDinheiro('#valorUnidadeSugeridoMaximo');
+        let ultimaViewModel = {};
+        const urlAtivar = '@Url.Action("Ativar", "Lanche")';
+        const urlInativar = '@Url.Action("Inativar", "Lanche")';
+        const urlExcluir = '@Url.Action("Excluir", "Lanche")';
+    </script>
+}

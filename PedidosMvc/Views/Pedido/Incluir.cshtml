@@ -1,0 +1,421 @@
+@using System.Text.Json
+@using PedidosMvc.Domain.Model.ViewModel.Pedido;
+@model IncluirPedidoViewModel;
+
+@{
+    ViewData["Title"] = "Novo Pedido";
+    var opcoesDeLanchesSerializadas = JsonSerializer.Serialize(Model.opcoesDeLanches);
+    var opcoesDeBebidasSerializadas = JsonSerializer.Serialize(Model.opcoesDeBebidas);
+}
+
+<section>
+    <h2><i class='bi bi-plus-lg px-1'></i>Incluir Pedido</h2>
+</section>
+
+<section class='mt-3'>
+    <div class='row g-0'>
+        <div class='col-12 col-sm-8 col-md-6 p-2 d-flex flex-column'>
+            <label>Nome Cliente</label>
+            <input id='nomeCliente' />
+        </div>
+        <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+            <label>Ativo</label>
+            <select id='estaAtivo'>
+                <option value='true' selected>Sim</option>
+                <option value='false'>Não</option>
+            </select>
+        </div>
+        
+        <article class='mt-3 pfast-scroller col-12'>
+            <table class='w-100'>
+                <thead class='w-100'>
+                    <tr class='w-100'>
+                        <th class='p-2 border-2 btn-tamanho-minimo-2_0x'>Nome</th>
+                        <th class='p-2 border-2 btn-tamanho-minimo'>Quantidade</th>
+                        <th class='p-2 border-2 btn-tamanho-minimo-1_5x'>Volume (ML)</th>
+                        <th class='p-2 border-2 btn-tamanho-minimo-2_0x'>Valor Item (R$)</th>
+                        <th class='p-2 border-2 btn-tamanho-minimo-1_5x'>...</th>
+                    </tr>
+                </thead>
+                <tbody class='w-100' id='resultadosItemPedido'>
+                    <tr class='border-top border-2 w-100'>
+                        <td colspan='5' class='p-2 text-center'>Nenhum resultado</td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
+
+        <div class='col-12'>
+            <span class='fw-bold'>Valor Total: R$&nbsp;</span><span id='valorTotal'>0,00</span>
+        </div>
+
+        <div class='col-12 row g-0 d-flex justify-content-end'>
+            <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                <button class='border-0 bg-pfast-btn-1 p-2 w-100 text-white' type='button' onclick='collapseNovaBebida.fechar();resetCamposNovoLanche();collapseNovoLanche.abrir();'><i class='bi bi-plus-lg px-1'></i>Novo Lanche</button>
+            </div>
+            
+            <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                <button class='border-0 bg-pfast-btn-1 p-2 w-100 text-white' type='button' onclick='collapseNovoLanche.fechar();resetCamposNovaBebida();collapseNovaBebida.abrir();' ><i class='bi bi-plus-lg px-1'></i>Nova Bebida</button>
+            </div>
+        </div>
+
+        <article class='mt-3'>
+            <div class='bg-pfast-form row g-0 collapse' id='formNovoLanche'>
+                <div class='col-12'>
+                    <h3 class='m-0 p-2'>Novo Lanche</h3>
+                </div>
+                <div class='col-12 col-sm-8 col-md-6 p-2 d-flex flex-column'>
+                    <label>Nome</label>
+                    <select id='nome_novoLanche' onchange='preencherValorUnidadeNovoLanche();preencherValorItemNovoLanche();'>
+                        <option value='null'>Selecione...</option>
+                        @foreach(var opcaoDeLanche in Model.opcoesDeLanches) {
+                            <option value='@opcaoDeLanche.id'>@opcaoDeLanche.nome</option>
+                        }
+                    </select>
+                </div>
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+                    <label>Quantidade</label>
+                    <input id='quantidade_novoLanche' onchange='preencherValorItemNovoLanche();' />
+                </div>
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+                    <label>Valor Unidade (R$)</label>
+                    <input id='valorUnidade_novoLanche' onchange='preencherValorItemNovoLanche();' />
+                </div>
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+                    <label>Valor Item (R$)</label>
+                    <input id='valorItem_novoLanche' disabled readonly />
+                </div>
+                <div class='col-12 row g-0 d-flex justify-content-end'>
+                    <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                        <button class='border-0 bg-pfast-btn-2 p-2 w-100' type='button' onclick='collapseNovoLanche.fechar();' ><i class='bi bi-x-lg px-1'></i>Cancelar</button>
+                    </div>
+                    
+                    <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                        <button class='border-0 bg-pfast-btn-1 p-2 w-100 text-white' type='button' onclick='incluirNovoLanche();' ><i class='bi bi-check2 px-1'></i>Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class='mt-3'>
+            <div class='bg-pfast-form row g-0 collapse' id='formNovaBebida'>
+                <div class='col-12'>
+                    <h3 class='m-0 p-2'>Nova Bebida</h3>
+                </div>
+                <div class='col-12 col-sm-8 col-md-6 p-2 d-flex flex-column'>
+                    <label>Nome</label>
+                    <select id='nome_novaBebida' onchange='preencherValorLitroNovaBebida();preencherValorItemNovaBebida();'>
+                        <option value='null'>Selecione...</option>
+                        @foreach(var opcaoDeBebida in Model.opcoesDeBebidas) {
+                            <option value='@opcaoDeBebida.id'>@opcaoDeBebida.nome</option>
+                        }
+                    </select>
+                </div>
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+                    <label>Volume (ML)</label>
+                    <input id='volumeMl_novaBebida' onchange='preencherValorItemNovaBebida();' />
+                </div>
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+                    <label>Valor Litro (R$)</label>
+                    <input id='valorLitro_novaBebida' onchange='preencherValorItemNovaBebida();' />
+                </div>
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+                    <label>Valor Item (R$)</label>
+                    <input id='valorItem_novaBebida' disabled readonly />
+                </div>
+                <div class='col-12 row g-0 d-flex justify-content-end'>
+                    <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                        <button class='border-0 bg-pfast-btn-2 p-2 w-100' type='button' onclick='collapseNovaBebida.fechar();' ><i class='bi bi-x-lg px-1'></i>Cancelar</button>
+                    </div>
+                    
+                    <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                        <button class='border-0 bg-pfast-btn-1 p-2 w-100 text-white' type='button' onclick='incluirNovaBebida();' ><i class='bi bi-check2 px-1'></i>Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <div class='col-12 row g-0 d-flex justify-content-end'>
+            <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                <button class='border-0 bg-pfast-btn-2 p-2 w-100' type='button' onclick='navegarPara("/Pedido");' ><i class='bi bi-x-lg px-1'></i>Cancelar</button>
+            </div>
+            
+            <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                <button class='border-0 bg-pfast-btn-1 p-2 w-100 text-white' type='button' onclick='postIncluir();' ><i class='bi bi-check2 px-1'></i>Salvar</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@section Scripts {
+    <script src='@Url.Content("~/js/inputs.js")' asp-append-version="true"></script>
+    <script>
+        const resetCamposNovoLanche = () => {
+            $('#nome_novoLanche').val('null');
+            $('#quantidade_novoLanche').val('');
+            $('#valorUnidade_novoLanche').val('');
+            $('#valorItem_novoLanche').val('');
+        }
+        
+        const resetCamposNovaBebida = () => {
+            $('#nome_novaBebida').val('null');
+            $('#volumeMl_novaBebida').val('');
+            $('#valorLitro_novaBebida').val('');
+            $('#valorItem_novaBebida').val('');
+        }
+
+        const renderizarGridItens = () => {
+            let htmlResultados = '';
+            let valorTotal = 0;
+            if (gridItens.length == 0) {
+                htmlResultados += "<tr class='border-top border-2 w-100'>";
+                htmlResultados += "    <td colspan='5' class='p-2 text-center'>Nenhum resultado</td>";
+                htmlResultados += "</tr>";
+            } else {
+                gridItens.forEach(item => {
+                    if (item.idBebida == undefined) {
+                        const nomeLancheGrid = opcoesDeLanches.find(x => x.id == item.idLanche).nome;
+                        const valorItemGrid = item.valorUnidade * item.quantidade;
+                        htmlResultados += `<tr class='w-100'>`;
+                        htmlResultados += `    <td class='p-2 border-2'>${nomeLancheGrid}</td>`;
+                        htmlResultados += `    <td class='p-2 border-2'>${item.quantidade}</td>`;
+                        htmlResultados += `    <td class='p-2 border-2'></td>`;
+                        htmlResultados += `    <td class='p-2 border-2'>${valorItemGrid.toFixed(2).replace('.', ',')}</td>`;
+                        htmlResultados += `    <td class='p-2 border-2'>`;
+                        htmlResultados += `        <div class='d-flex justify-content-around'>`;
+                        htmlResultados += `            <i class='bi bi-caret-up-fill px-1 cursor-pointer' onclick='posicionarItemIdLanche("${item.idLanche}", -1);'></i>`;
+                        htmlResultados += `            <i class='bi bi-caret-down-fill px-1 cursor-pointer' onclick='posicionarItemIdLanche("${item.idLanche}", 1);'></i>`;
+                        htmlResultados += `            <i class='bi bi-x-lg px-1 text-danger cursor-pointer' onclick='excluirItemIdLanche("${item.idLanche}");'></i>`;
+                        htmlResultados += `        </div>`;
+                        htmlResultados += `    </td>`;
+                        htmlResultados += `</tr>`;
+                        valorTotal += valorItemGrid;
+                    } else {
+                        const nomeBebidaGrid = opcoesDeBebidas.find(x => x.id == item.idBebida).nome;
+                        const valorItemGrid = item.valorLitro * item.volumeMl / 1000;
+                        htmlResultados += `<tr class='w-100'>`;
+                        htmlResultados += `    <td class='p-2 border-2'>${nomeBebidaGrid}</td>`;
+                        htmlResultados += `    <td class='p-2 border-2'></td>`;
+                        htmlResultados += `    <td class='p-2 border-2'>${item.volumeMl}</td>`;
+                        htmlResultados += `    <td class='p-2 border-2'>${valorItemGrid.toFixed(2).replace('.', ',')}</td>`;
+                        htmlResultados += `    <td class='p-2 border-2'>`;
+                        htmlResultados += `        <div class='d-flex justify-content-around'>`;
+                        htmlResultados += `            <i class='bi bi-caret-up-fill px-1 cursor-pointer' onclick='posicionarItemIdBebida("${item.idBebida}", -1);'></i>`;
+                        htmlResultados += `            <i class='bi bi-caret-down-fill px-1 cursor-pointer' onclick='posicionarItemIdBebida("${item.idBebida}", 1);'></i>`;
+                        htmlResultados += `            <i class='bi bi-x-lg px-1 text-danger cursor-pointer' onclick='excluirItemIdBebida("${item.idBebida}");'></i>`;
+                        htmlResultados += `        </div>`;
+                        htmlResultados += `    </td>`;
+                        htmlResultados += `</tr>`;
+                        valorTotal += valorItemGrid;
+                    }
+                });
+            }
+            $('#resultadosItemPedido').html(htmlResultados);
+            $('#valorTotal').text(valorTotal.toFixed(2).replace('.', ','));
+        }
+
+        const posicionarItemIdBebida = (idBebida, offset) => {
+            if (offset === -1) {
+                const indexIdBebida = gridItens.findIndex(x => x.idBebida == idBebida);
+                if (indexIdBebida == 0 || indexIdBebida == -1) {
+                    return;
+                }
+                const itemIndexIdBebida = gridItens[indexIdBebida];
+                gridItens.splice(indexIdBebida - 1, 0, itemIndexIdBebida);
+                gridItens.splice(indexIdBebida + 1, 1);
+                renderizarGridItens();
+                return;
+            }
+            if (offset !== 1) {
+                return;
+            }
+            const indexIdBebida = gridItens.findIndex(x => x.idBebida == idBebida);
+            if (indexIdBebida == gridItens.length - 1 || indexIdBebida == -1) {
+                return;
+            }
+            const itemIndexIdBebida = gridItens[indexIdBebida];
+            gridItens.splice(indexIdBebida + 2, 0, itemIndexIdBebida);
+            gridItens.splice(indexIdBebida, 1);
+            renderizarGridItens();
+        }
+
+        const posicionarItemIdLanche = (idLanche, offset) => {
+            if (offset === -1) {
+                const indexIdLanche = gridItens.findIndex(x => x.idLanche == idLanche);
+                if (indexIdLanche == 0 || indexIdLanche == -1) {
+                    return;
+                }
+                const itemIndexIdLanche = gridItens[indexIdLanche];
+                gridItens.splice(indexIdLanche - 1, 0, itemIndexIdLanche);
+                gridItens.splice(indexIdLanche + 1, 1);
+                renderizarGridItens();
+                return;
+            }
+            if (offset !== 1) {
+                return;
+            }
+            const indexIdLanche = gridItens.findIndex(x => x.idLanche == idLanche);
+            if (indexIdLanche == gridItens.length - 1 || indexIdLanche == -1) {
+                return;
+            }
+            const itemIndexIdLanche = gridItens[indexIdLanche];
+            gridItens.splice(indexIdLanche + 2, 0, itemIndexIdLanche);
+            gridItens.splice(indexIdLanche, 1);
+            renderizarGridItens();
+        }
+
+        const excluirItemIdBebida = (idBebida) => {
+            gridItens = gridItens.filter(x => x.idBebida != idBebida);
+            renderizarGridItens();
+        }
+        
+        const excluirItemIdLanche = (idLanche) => {
+            gridItens = gridItens.filter(x => x.idLanche != idLanche);
+            renderizarGridItens();
+        }
+
+        const preencherValorUnidadeNovoLanche = () => {
+            let lancheSelecionado = opcoesDeLanches.find(x => x.id == $('#nome_novoLanche').val());
+            if (lancheSelecionado == undefined) {
+                $('#valorUnidade_novoLanche').val('');
+            }
+            $('#valorUnidade_novoLanche').val(lancheSelecionado.valorUnidadeSugerido.toFixed(2).replace('.', ','));
+        }
+
+        const preencherValorItemNovoLanche = () => {
+            if (!inputValorUnidadeNovoLanche.foiInformado() || !inputQuantidadeNovoLanche.foiInformado()) {
+                $('#valorItem_novoLanche').val('');
+                return;
+            }
+            let valorItem = inputValorUnidadeNovoLanche.valorExato() * inputQuantidadeNovoLanche.valorExato();
+            $('#valorItem_novoLanche').val(valorItem.toFixed(2).replace('.', ','));
+        }
+
+        const incluirNovoLanche = () => {
+            let camposNaoPreenchidos = [];
+            if ($('#nome_novoLanche').val() == 'null') {
+                camposNaoPreenchidos.push('o Nome');
+            }
+            if (!inputQuantidadeNovoLanche.foiInformado()) {
+                camposNaoPreenchidos.push('a Quantidade');
+            }
+            if (!inputValorUnidadeNovoLanche.foiInformado()) {
+                camposNaoPreenchidos.push('o Valor Unidade');
+            }
+            if (camposNaoPreenchidos.length > 0) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', `É obrigatório informar ${listarItensPortugues(camposNaoPreenchidos)}.`);
+                return;
+            }
+            let novoLanche = {
+                idLanche: $('#nome_novoLanche').val(),
+                quantidade: inputQuantidadeNovoLanche.valorExato(),
+                valorUnidade: inputValorUnidadeNovoLanche.valorExato(),
+            };
+            gridItens.push(novoLanche);
+            renderizarGridItens();
+            collapseNovoLanche.fechar();
+        }
+        
+        const preencherValorLitroNovaBebida = () => {
+            let bebidaSelecionada = opcoesDeBebidas.find(x => x.id == $('#nome_novaBebida').val());
+            if (bebidaSelecionada == undefined) {
+                $('#valorLitro_novaBebida').val('');
+            }
+            $('#valorLitro_novaBebida').val(bebidaSelecionada.valorLitroSugerido.toFixed(2).replace('.', ','));
+        }
+
+        const preencherValorItemNovaBebida = () => {
+            if (!inputValorLitroNovaBebida.foiInformado() || !inputVolumeMlNovaBebida.foiInformado()) {
+                $('#valorItem_novaBebida').val('');
+                return;
+            }
+            let valorItem = inputValorLitroNovaBebida.valorExato() * inputVolumeMlNovaBebida.valorExato() / 1000;
+            $('#valorItem_novaBebida').val(valorItem.toFixed(2).replace('.', ','));
+        }
+
+        const incluirNovaBebida = () => {
+            let camposNaoPreenchidos = [];
+            if ($('#nome_novaBebida').val() == 'null') {
+                camposNaoPreenchidos.push('o Nome');
+            }
+            if (!inputVolumeMlNovaBebida.foiInformado()) {
+                camposNaoPreenchidos.push('o Volume');
+            }
+            if (!inputValorLitroNovaBebida.foiInformado()) {
+                camposNaoPreenchidos.push('o Valor Litro');
+            }
+            if (camposNaoPreenchidos.length > 0) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', `É obrigatório informar ${listarItensPortugues(camposNaoPreenchidos)}.`);
+                return;
+            }
+            let novaBebida = {
+                idBebida: $('#nome_novaBebida').val(),
+                volumeMl: inputVolumeMlNovaBebida.valorExato(),
+                valorLitro: inputValorLitroNovaBebida.valorExato(),
+            };
+            gridItens.push(novaBebida);
+            renderizarGridItens();
+            collapseNovaBebida.fechar();
+        }
+
+        const postIncluir = () => {
+            let camposNaoPreenchidos = [];
+            if ($('#nomeCliente').val().trim() == '') {
+                camposNaoPreenchidos.push('o Nome Cliente');
+            }
+            if (camposNaoPreenchidos.length > 0) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', `É obrigatório informar ${listarItensPortugues(camposNaoPreenchidos)}.`);
+                return;
+            }
+            if (gridItens.length == 0) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', `O pedido precisa ter pelo menos um item.`);
+                return;
+            }
+            let formDto = {
+                nomeCliente: $('#nomeCliente').val(),
+                estaAtivo: $('#estaAtivo').val() == 'true',
+                itensBebida: [],
+                itensLanche: []
+            };
+            gridItens.forEach((x, indx) => {
+                if (x.idBebida == undefined) {
+                    formDto.itensLanche.push({
+                        ...x,
+                        posicaoLista: indx + 1
+                    });
+                } else {
+                    formDto.itensBebida.push({
+                        ...x,
+                        posicaoLista: indx + 1
+                    });
+                }
+            });
+            postRequestRedirectAposOk('@Url.Action("Incluir", "Pedido")', formDto, '/Pedido');
+        }
+
+        const iniciar = () => {
+            opcoesDeLanches = JSON.parse('@opcoesDeLanchesSerializadas'.replaceAll('&quot;', '"'));
+            opcoesDeBebidas = JSON.parse('@opcoesDeBebidasSerializadas'.replaceAll('&quot;', '"'));
+            aplicarInputmaskDinheiro('#valorUnidade_novoLanche, #valorItem_novoLanche, #valorLitro_novaBebida, #valorItem_novoBebida');
+            aplicarInputmaskNumero('#quantidade_novoLanche, #volumeMl_novaBebida');
+        };
+
+        $(window).on('load', iniciar);
+        const inputValorUnidadeNovoLanche = new InputDinheiro('#valorUnidade_novoLanche');
+        const inputValorItemNovoLanche = new InputDinheiro('#valorItem_novoLanche');
+        const inputQuantidadeNovoLanche = new InputNumero('#quantidade_novoLanche');
+        const inputValorLitroNovaBebida = new InputDinheiro('#valorLitro_novaBebida');
+        const inputValorItemNovaBebida = new InputDinheiro('#valorItem_novoBebida');
+        const inputVolumeMlNovaBebida = new InputNumero('#volumeMl_novaBebida');
+        const collapseNovoLanche = new Collapse('#formNovoLanche', false);
+        const collapseNovaBebida = new Collapse('#formNovaBebida', false);
+        let opcoesDeLanches = {};
+        let opcoesDeBebidas = {};
+        let gridItens = [];
+    </script>
+}

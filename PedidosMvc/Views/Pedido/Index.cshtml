@@ -1,0 +1,374 @@
+@using System.Text.Json
+@using PedidosMvc.Domain.Model.ViewModel.Pedido;
+@model PesquisaRealizadaPedidoViewModel;
+
+@{
+    ViewData["Title"] = "Pedido";
+    var ultimaViewModelSerializada = JsonSerializer.Serialize(Model);
+}
+
+<section>
+    <h2><i class='bi bi-inbox px-1'></i>Pedido</h2>
+</section>
+
+<section class='bg-pfast-form mt-3'>
+    <div class='d-flex justify-content-between p-2'>
+        <h3 class='m-0'>Filtros</h3>
+        <button class='border-0 bg-pfast-form' type='button' data-bs-toggle='collapse' data-bs-target='#filtros'><i class='bi bi-list px-1'></i></button>
+    </div>
+    <div class='collapse show' id='filtros'>
+        <div class='row g-0'>
+            <div class='col-12 col-md-6 p-2 d-flex flex-column'>
+                <label>Nome Cliente</label>
+                <input asp-for='nomeCliente' />
+            </div>
+            <div class='col-12 col-md-6 p-2 d-flex flex-column'>
+                <label>Nome Primeiro Item</label>
+                <input asp-for='nomePrimeiroItem' />
+            </div>
+            <div class='col-12 col-lg-6 p-2 row g-0 d-flex align-items-center border border-2 border-dark'>
+                <label class='col-12 col-sm-4'>Dia Criação</label>
+                <div class='col-6 col-sm-4 p-2 d-flex flex-column'>
+                    <label>Desde:</label>
+                    <input type='date' asp-for='diaCriacaoDesde' />
+                </div>
+                <div class='col-6 col-sm-4 p-2 d-flex flex-column'>
+                    <label>Até:</label>
+                    <input type='date' asp-for='diaCriacaoAte' />
+                </div>
+            </div>
+            <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+                <label>Entregue</label>
+                <select id='estaEntregue'>
+                    <option value='null'>Selecione...</option>
+                    <option value='true'>Sim</option>
+                    <option value='false'>Não</option>
+                </select>
+            </div>
+            <div class='col-12 col-sm-8 col-md-6 p-2 row g-0 d-flex align-items-center border border-2 border-dark'>
+                <label class='col-6'>Valor Total (R$)</label>
+                <div class='col-3 p-2 d-flex flex-column'>
+                    <label>Desde:</label>
+                    <input asp-for='valorTotalMinimo' />
+                </div>
+                <div class='col-3 p-2 d-flex flex-column'>
+                    <label>Até:</label>
+                    <input asp-for='valorTotalMaximo' />
+                </div>
+            </div>
+            <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+                <label>Ativo</label>
+                <select id='estaAtivo'>
+                    <option value='null'>Selecione...</option>
+                    <option value='true'>Sim</option>
+                    <option value='false'>Não</option>
+                </select>
+            </div>
+            <div class='col-12 row g-0 d-flex justify-content-end'>
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                    <button class='border-0 bg-pfast-btn-2 p-2 w-100' type='button' onclick='limparFiltros();' ><i class='bi bi-backspace px-1'></i>Limpar</button>
+                </div>
+                
+                <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                    <button class='border-0 bg-pfast-btn-1 p-2 w-100 text-white' type='button' onclick='postPesquisaFormulario();' ><i class='bi bi-search px-1'></i>Pesquisar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class='mt-3 pfast-scroller'>
+    <table class='w-100'>
+        <thead class='w-100' id='cabecalhoPedido'>
+            
+        </thead>
+        <tbody class='w-100' id='resultadosPedido'>
+            
+        </tbody>
+    </table>
+    <div id='numeracaoPagina' class='mt-2 d-flex justify-content-center'>
+
+    </div>
+</section>
+
+<section class='mt-3 pfast-scroller row g-0 d-flex justify-content-end'>
+    <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+        <button class='border-0 bg-pfast-btn-1 text-white p-2 w-100' type='button' onclick='navegarPara("/Pedido/Incluir");' ><i class='bi bi-plus-lg px-1'></i>Novo</button>
+    </div>
+</section>
+
+@section Scripts {
+    <script src='@Url.Content("~/js/inputs.js")' asp-append-version="true"></script>
+    <script>
+
+        const limparFiltros = () => {
+            $('#nomeCliente').val('');
+            $('#nomePrimeiroItem').val('');
+            $('#diaCriacaoDesde').val('');
+            $('#diaCriacaoAte').val('');
+            $('#estaEntregue').val('null');
+            $('#valorTotalMinimo').val('');
+            $('#valorTotalMaximo').val('');
+            $('#estaAtivo').val('null');
+        };
+
+        const renderizarCabecalho = () => {
+            let htmlCabecalho = '';
+            htmlCabecalho += `<tr class='w-100'>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo-2_0x cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(0);'>Nome Cliente<i class="bi ${montarIcone(0, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo-2_5x cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(1);'>Nome Primeiro Item<i class="bi ${montarIcone(1, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo-2_5x cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(2);'>Hora Criação<i class="bi ${montarIcone(2, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo-1_5x cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(3);'>Entregue<i class="bi ${montarIcone(3, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo-2_5x cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(4);'>Hora Entrega<i class="bi ${montarIcone(4, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo-2_0x cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(5);'>Valor Total (R$)<i class="bi ${montarIcone(5, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo cursor-pointer' onclick='postPesquisaOrdenacaoInvertida(6);'>Ativo<i class="bi ${montarIcone(6, ultimaViewModel.paginacaoRealizada)} px-1"></i></th>`;
+            htmlCabecalho += `    <th class='p-2 border-2 btn-tamanho-minimo'>...</th>`;
+            htmlCabecalho += `</tr>`;
+            $('#cabecalhoPedido').html(htmlCabecalho);
+        }
+
+        const renderizarPopup = (idPedido) => {
+            let pedidoDetalhado = ultimaViewModel.resultados.find(x => x.id == idPedido);
+            let htmlPopup = '';
+            htmlPopup += `<div class='row g-0'>`
+            htmlPopup += `    <div class='col-12 d-flex'>`;
+            htmlPopup += `        <span class='fw-bold'>Nome Cliente:&nbsp;</span><span>${pedidoDetalhado.nomeCliente}</span>`;
+            htmlPopup += `    </div>`;
+            htmlPopup += `    <div class='col-12 d-flex'>`;
+            htmlPopup += `        <span class='fw-bold'>Hora Criação:&nbsp;</span>${formatarDataJsonString(pedidoDetalhado.horaCriacao)}<span></span>`;
+            htmlPopup += `    </div>`;
+            htmlPopup += `    <div class='col-12 d-flex'>`;
+            htmlPopup += `        <span class='fw-bold'>Entregue:&nbsp;</span>${pedidoDetalhado.horaEntrega != null ? 'Sim' : 'Não'}<span></span>`;
+            htmlPopup += `    </div>`;
+            htmlPopup += `    <div class='col-12 d-flex'>`;
+            htmlPopup += `        <span class='fw-bold'>Hora Entrega:&nbsp;</span>${pedidoDetalhado.horaEntrega != null ? formatarDataJsonString(pedidoDetalhado.horaEntrega) : ''}<span></span>`;
+            htmlPopup += `    </div>`;
+            htmlPopup += `    <div class='col-12 d-flex'>`;
+            htmlPopup += `        <span class='fw-bold'>Ativo:&nbsp;</span>${pedidoDetalhado.estaAtivo ? 'Sim' : 'Não'}<span></span>`;
+            htmlPopup += `    </div>`;
+            htmlPopup += `</div>`
+            htmlPopup += `<article class='mt-3 pfast-scroller col-12'>`;
+            htmlPopup += `    <table class='w-100'>`;
+            htmlPopup += `        <thead class='w-100'>`;
+            htmlPopup += `            <tr class='w-100'>`;
+            htmlPopup += `                <th class='p-2 border-2 btn-tamanho-minimo-2_0x'>Nome</th>`;
+            htmlPopup += `                <th class='p-2 border-2 btn-tamanho-minimo'>Quantidade</th>`;
+            htmlPopup += `                <th class='p-2 border-2 btn-tamanho-minimo'>Volume (ML)</th>`;
+            htmlPopup += `                <th class='p-2 border-2 btn-tamanho-minimo-2_0x'>Valor Item (R$)</th>`;
+            htmlPopup += `            </tr>`;
+            htmlPopup += `        </thead>`;
+            htmlPopup += `        <tbody class='w-100'>`;
+            let gridItens = [];
+            for (let posicaoGridItem = 1; posicaoGridItem <= pedidoDetalhado.itensBebida.length + pedidoDetalhado.itensLanche.length; posicaoGridItem++) {
+                let itemEncontradoIndxPush = pedidoDetalhado.itensLanche.findIndex(x => x.posicaoLista == posicaoGridItem);
+                if (itemEncontradoIndxPush != -1) {
+                    let itemEncontradoPush = pedidoDetalhado.itensLanche[itemEncontradoIndxPush];
+                    gridItens.push({
+                        ...itemEncontradoPush
+                    });
+                    continue;
+                }
+                itemEncontradoIndxPush = pedidoDetalhado.itensBebida.findIndex(x => x.posicaoLista == posicaoGridItem);
+                if (itemEncontradoIndxPush == -1) {
+                    continue;
+                }
+                let itemEncontradoPush = pedidoDetalhado.itensBebida[itemEncontradoIndxPush];
+                gridItens.push({
+                    ...itemEncontradoPush
+                });
+            }
+            let valorTotal = 0;
+            gridItens.forEach(item => {
+                if (item.idBebida == undefined) {
+                    const valorItemGrid = item.valorUnidade * item.quantidade;
+                    htmlPopup += `            <tr class='w-100'>`;
+                    htmlPopup += `                <td class='p-2 border-2'>${item.nomeLanche}</td>`;
+                    htmlPopup += `                <td class='p-2 border-2'>${item.quantidade}</td>`;
+                    htmlPopup += `                <td class='p-2 border-2'></td>`;
+                    htmlPopup += `                <td class='p-2 border-2'>${valorItemGrid.toFixed(2).replace('.', ',')}</td>`;
+                    htmlPopup += `            </tr>`;
+                    valorTotal += valorItemGrid;
+                } else {
+                    const valorItemGrid = item.valorLitro * item.volumeMl / 1000;
+                    htmlPopup += `            <tr class='w-100'>`;
+                    htmlPopup += `                <td class='p-2 border-2'>${item.nomeBebida}</td>`;
+                    htmlPopup += `                <td class='p-2 border-2'></td>`;
+                    htmlPopup += `                <td class='p-2 border-2'>${item.volumeMl}</td>`;
+                    htmlPopup += `                <td class='p-2 border-2'>${valorItemGrid.toFixed(2).replace('.', ',')}</td>`;
+                    htmlPopup += `            </tr>`;
+                    valorTotal += valorItemGrid;
+                }
+            });
+            htmlPopup += `        </tbody>`;
+            htmlPopup += `    </table>`;
+            htmlPopup += `</article>`;
+            htmlPopup += `<div>`;
+            htmlPopup += `    <span class='fw-bold'>Valor Total: R$&nbsp;</span><span>${pedidoDetalhado.valorTotal.toFixed(2).replace('.', ',')}</span>`;
+            htmlPopup += `</div>`;
+            alertaModal.mostrarPopupHtml(pedidoDetalhado.nomeCliente, htmlPopup);
+        }
+
+        const renderizarResultados = () => {
+            let htmlResultados = '';
+            if (ultimaViewModel.resultados.length == 0) {
+                htmlResultados += "<tr class='border-top border-2 w-100'>";
+                htmlResultados += "    <td colspan='8' class='p-2 text-center'>Nenhum resultado</td>";
+                htmlResultados += "</tr>";
+            } else {
+                ultimaViewModel.resultados.forEach(pedido => {
+                    htmlResultados += `<tr class='w-100'>`;
+                    htmlResultados += `    <td class='p-2 border-2'>${pedido.nomeCliente}</td>`;
+                    htmlResultados += `    <td class='p-2 border-2'>${pedido.nomePrimeiroItem}</td>`;
+                    htmlResultados += `    <td class='p-2 border-2'>${formatarDataJsonString(pedido.horaCriacao)}</td>`;
+                    if (pedido.horaEntrega != null) {
+                        htmlResultados += `    <td class='p-2 border-2'><i class='bi bi-check-square-fill'></i></td>`;
+                    } else {
+                        htmlResultados += `    <td class='p-2 border-2'><i class='bi bi-square cursor-pointer' onclick='confirmarModal.setCallbackAposSim(() => { postRequestRedirectAposOk("${urlMarcarEntregue}?id=${pedido.id}", {}, "/Pedido"); });confirmarModal.dispararConfirmacao("Atenção!", "Deseja marcar pedido como entregue?");'></i></td>`;
+                    }
+                    htmlResultados += `    <td class='p-2 border-2'>${pedido.horaEntrega != null ? formatarDataJsonString(pedido.horaEntrega) : ''}</td>`;
+                    htmlResultados += `    <td class='p-2 border-2'>${pedido.valorTotal.toFixed(2).replace('.', ',')}</td>`;
+                    if (pedido.estaAtivo) {
+                        htmlResultados += `    <td class='p-2 border-2'><i class='bi bi-check-square-fill cursor-pointer' onclick='confirmarModal.setCallbackAposSim(() => { postRequestRedirectAposOk("${urlInativar}?id=${pedido.id}", {}, "/Pedido"); });confirmarModal.dispararConfirmacao("Atenção!", "Deseja inativar esse pedido?");'></i></td>`;
+                    } else {
+                        htmlResultados += `    <td class='p-2 border-2'><i class='bi bi-square cursor-pointer' onclick='confirmarModal.setCallbackAposSim(() => { postRequestRedirectAposOk("${urlAtivar}?id=${pedido.id}", {}, "/Pedido"); });confirmarModal.dispararConfirmacao("Atenção!", "Deseja ativar esse pedido?");'></i></td>`;
+                    }
+                    htmlResultados += `    <td class='p-2 border-2'>`;
+                    htmlResultados += `        <div class='d-flex justify-content-around'>`;
+                    htmlResultados += `            <i class='bi bi-eye-fill px-1 text-primary cursor-pointer' onclick='renderizarPopup("${pedido.id}");'></i>`;
+                    htmlResultados += `        </div>`;
+                    htmlResultados += `    </td>`;
+                    htmlResultados += `</tr>`;
+                });
+            }
+            $('#resultadosPedido').html(htmlResultados);
+        }
+
+        const renderizarNumeracao = () => {
+            let numerosPaginas = listarNumeracoes(ultimaViewModel.paginacaoRealizada.paginaAtual, ultimaViewModel.paginacaoRealizada.totalPaginas);
+            let htmlNumeracao = '';
+            numerosPaginas.forEach((numero, index) => {
+                let marginStart = '';
+                if (index > 0) {
+                    marginStart = ' ms-2';
+                }
+                if (numero === ultimaViewModel.paginacaoRealizada.paginaAtual) {
+                    htmlNumeracao += `<button type='button' class='border-0 bg-pfast-nav text-white btn-tamanho-minimo-0_5${marginStart}' >${numero}</button>`;
+                } else {
+                    htmlNumeracao += `<button type='button' class='border border-2 border-dark bg-white btn-tamanho-minimo-0_5${marginStart}' onclick='postPesquisaNumeracao(${numero});' >${numero}</button>`;
+                }
+            });
+            $('#numeracaoPagina').html(htmlNumeracao);
+        }
+
+        const postPesquisa = (formDto) => {
+            loadingModal.bloquearUi();
+            let requestPesquisar = postRequest('@Url.Action("Pesquisar", "Pedido")', formDto);
+            requestPesquisar.done((jsonResult) => {
+                let viewModel = jsonResult.retorno;
+                $('#nomeCliente').val(viewModel.nomeCliente);
+                $('#nomePrimeiroItem').val(viewModel.nomePrimeiroItem);
+                $('#diaCriacaoDesde').val(((viewModel.diaCriacaoDesde + '').trim() != '' && viewModel.diaCriacaoDesde != null) ? formatarDataViewModel(viewModel.diaCriacaoDesde) : '');
+                $('#diaCriacaoAte').val(((viewModel.diaCriacaoAte + '').trim() != '' && viewModel.diaCriacaoAte != null) ? formatarDataViewModel(viewModel.diaCriacaoAte) : '');
+                $('#estaEntregue').val(viewModel.estaEntregue != null ? (viewModel.estaEntregue ? 'true' : 'false') : 'null');
+                $('#valorTotalMinimo').val(viewModel.valorTotalMinimo != null ? viewModel.valorTotalMinimo.toFixed(2).replace('.', ',') : '');
+                $('#valorTotalMaximo').val(viewModel.valorTotalMaximo != null ? viewModel.valorTotalMaximo.toFixed(2).replace('.', ',') : '');
+                $('#estaAtivo').val(viewModel.estaAtivo != null ? (viewModel.estaAtivo ? 'true' : 'false') : 'null');
+                ultimaViewModel = viewModel;
+                renderizarCabecalho();
+                renderizarResultados();
+                renderizarNumeracao();
+                loadingModal.desbloquearUi();
+            });
+        };
+
+        const postPesquisaFormulario = () => {
+            if (($('#diaCriacaoDesde').val() + '').trim() != '' && ($('#diaCriacaoAte').val() + '').trim() != '' && new Date($('#diaCriacaoDesde').val()).getTime() > new Date($('#diaCriacaoAte').val()).getTime()) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', 'Intervalo de Data inválido.');
+                return;
+            }
+            if (inputValorTotalMinimo.foiInformado() && inputValorTotalMaximo.foiInformado() && inputValorTotalMinimo.valorExato() > inputValorTotalMaximo.valorExato()) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', 'Intervalo de Dinheiro inválido.');
+                return;
+            }
+            let formDto = {
+                nomeCliente: $('#nomeCliente').val(),
+                nomePrimeiroItem: $('#nomePrimeiroItem').val(),
+                offsetTempoLocalMilissegundos: (new Date().getTimezoneOffset()) * 60 * 1000,
+                paginacaoPesquisaDto: {
+                    paginaAtual: 1,
+                    indiceColunaAOrdenar : 0,
+                    ehOrdenacaoCrescente: true
+                }
+            }
+            formDto.diaCriacaoDesde = ($('#diaCriacaoDesde').val() + '').trim() != '' ? $('#diaCriacaoDesde').val() : null;
+            formDto.diaCriacaoAte = ($('#diaCriacaoAte').val() + '').trim() != '' ? $('#diaCriacaoAte').val() : null;            
+            formDto.valorTotalMinimo = inputValorTotalMinimo.foiInformado() ? inputValorTotalMinimo.valorExato() : null;
+            formDto.valorTotalMaximo = inputValorTotalMaximo.foiInformado() ? inputValorTotalMaximo.valorExato() : null;
+            formDto.estaEntregue = $('#estaEntregue').val() != 'null' ? $('#estaEntregue').val() == 'true' : null;
+            formDto.estaAtivo = $('#estaAtivo').val() != 'null' ? $('#estaAtivo').val() == 'true' : null;
+            postPesquisa(formDto);
+        }
+
+        const postPesquisaOrdenacaoInvertida = (indColuna) => {
+            let formDto = {
+                nomeCliente: ultimaViewModel.nomeCliente,
+                nomePrimeiroItem: ultimaViewModel.nomePrimeiroItem,
+                diaCriacaoDesde: ultimaViewModel.diaCriacaoDesde,
+                diaCriacaoAte: ultimaViewModel.diaCriacaoAte,
+                offsetTempoLocalMilissegundos: (new Date().getTimezoneOffset()) * 60 * 1000,
+                estaEntregue: ultimaViewModel.estaEntregue,
+                valorTotalMinimo: ultimaViewModel.valorTotalMinimo,
+                valorTotalMaximo: ultimaViewModel.valorTotalMaximo,
+                estaAtivo: ultimaViewModel.estaAtivo,
+                paginacaoPesquisaDto: {
+                    paginaAtual: ultimaViewModel.paginacaoRealizada.paginaAtual
+                }
+            }
+            formDto.paginacaoPesquisaDto.ehOrdenacaoCrescente = (indColuna != ultimaViewModel.paginacaoRealizada.indiceColunaAOrdenar || !ultimaViewModel.paginacaoRealizada.ehOrdenacaoCrescente);
+            formDto.paginacaoPesquisaDto.indiceColunaAOrdenar = indColuna;
+            postPesquisa(formDto);
+        }
+
+        const postPesquisaNumeracao = (numeroPagina) => {
+            let formDto = {
+                nomeCliente: ultimaViewModel.nomeCliente,
+                nomePrimeiroItem: ultimaViewModel.nomePrimeiroItem,
+                diaCriacaoDesde: ultimaViewModel.diaCriacaoDesde,
+                diaCriacaoAte: ultimaViewModel.diaCriacaoAte,
+                offsetTempoLocalMilissegundos: (new Date().getTimezoneOffset()) * 60 * 1000,
+                estaEntregue: ultimaViewModel.estaEntregue,
+                valorTotalMinimo: ultimaViewModel.valorTotalMinimo,
+                valorTotalMaximo: ultimaViewModel.valorTotalMaximo,
+                estaAtivo: ultimaViewModel.estaAtivo,
+                paginacaoPesquisaDto: {
+                    paginaAtual: numeroPagina,
+                    ehOrdenacaoCrescente: ultimaViewModel.paginacaoRealizada.ehOrdenacaoCrescente,
+                    indiceColunaAOrdenar: ultimaViewModel.paginacaoRealizada.indiceColunaAOrdenar
+                }
+            }
+            postPesquisa(formDto);
+        }
+
+        const iniciar = () => {
+            ultimaViewModel = JSON.parse('@ultimaViewModelSerializada'.replaceAll('&quot;', '"'));
+            aplicarInputmaskDinheiro('#valorTotalMinimo, #valorTotalMaximo');
+            $('#nome').val(ultimaViewModel.nome);
+            $('#valorUnidadeSugeridoMinimo').val(ultimaViewModel.valorUnidadeSugeridoMinimo != null ? ultimaViewModel.valorUnidadeSugeridoMinimo.toFixed(2).replace('.', ',') : '');
+            $('#valorUnidadeSugeridoMaximo').val(ultimaViewModel.valorUnidadeSugeridoMaximo != null ? ultimaViewModel.valorUnidadeSugeridoMaximo.toFixed(2).replace('.', ',') : '');
+            $('#estaAtivo').val(ultimaViewModel.estaAtivo != null ? (ultimaViewModel.estaAtivo ? 'true' : 'false') : 'null');
+            renderizarCabecalho();
+            renderizarResultados();
+            renderizarNumeracao();
+        };
+
+        $(window).on('load', iniciar);
+        const inputValorTotalMinimo = new InputDinheiro('#valorTotalMinimo');
+        const inputValorTotalMaximo = new InputDinheiro('#valorTotalMaximo');
+        let ultimaViewModel = {};
+        const urlMarcarEntregue = '@Url.Action("MarcarEntregue", "Pedido")';
+        const urlAtivar = '@Url.Action("Ativar", "Pedido")';
+        const urlInativar = '@Url.Action("Inativar", "Pedido")';
+    </script>
+}

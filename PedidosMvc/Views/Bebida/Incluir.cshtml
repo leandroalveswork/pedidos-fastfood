@@ -1,0 +1,79 @@
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Nova Bebida";
+}
+
+
+<section>
+    <h2><i class='bi bi-plus-lg px-1'></i>Incluir Bebida</h2>
+</section>
+
+<section class='bg-pfast-form mt-3'>
+    <div class='row g-0'>
+        <div class='col-12 col-sm-8 col-md-6 p-2 d-flex flex-column'>
+            <label>Nome</label>
+            <input id='nome' />
+        </div>
+        <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+            <label>Valor 1L Sugerido (R$)</label>
+            <input id='valorLitroSugerido' />
+        </div>
+        <div class='col-6 col-sm-4 col-md-3 p-2 d-flex flex-column'>
+            <label>Ativo</label>
+            <select id='estaAtivo'>
+                <option value='true' selected>Sim</option>
+                <option value='false'>Não</option>
+            </select>
+        </div>
+        <div class='col-12 row g-0 d-flex justify-content-end'>
+            <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                <button class='border-0 bg-pfast-btn-2 p-2 w-100' type='button' onclick='navegarPara("/Bebida");' ><i class='bi bi-x-lg px-1'></i>Cancelar</button>
+            </div>
+            
+            <div class='col-6 col-sm-4 col-md-3 p-2 d-flex'>
+                <button class='border-0 bg-pfast-btn-1 p-2 w-100 text-white' type='button' onclick='postIncluir();' ><i class='bi bi-check2 px-1'></i>Salvar</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@section Scripts {
+    <script src='@Url.Content("~/js/inputs.js")' asp-append-version="true"></script>
+    <script>
+
+        const postIncluir = () => {
+            let camposNaoPreenchidos = [];
+            if ($('#nome').val().trim() == '') {
+                camposNaoPreenchidos.push('o Nome');
+            }
+            if (!inputValorLitroSugerido.foiInformado()) {
+                camposNaoPreenchidos.push('o Valor 1L Sugerido');
+            }
+            if (camposNaoPreenchidos.length > 0) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', `É obrigatório informar ${listarItensPortugues(camposNaoPreenchidos)}.`);
+                return;
+            }
+            if (inputValorLitroSugerido.foiInformadoIncorretamente()) {
+                alertaModal.anularCallbackAposOk();
+                alertaModal.dispararMensagem('Atenção!', 'text-danger bi bi-x-circle', 'Dinheiro inválido.');
+                return;
+            }
+            let formDto = {
+                nome: $('#nome').val(),
+            }
+            formDto.valorLitroSugerido = inputValorLitroSugerido.valorExato();
+            formDto.estaAtivo = $('#estaAtivo').val() == 'true'
+            postRequestRedirectAposOk('@Url.Action("Incluir", "Bebida")', formDto, '/Bebida');
+        }
+
+        const iniciar = () => {
+            aplicarInputmaskDinheiro('#valorLitroSugerido');
+        };
+
+        $(window).on('load', iniciar);
+        const inputValorLitroSugerido = new InputDinheiro('#valorLitroSugerido');
+    </script>
+}
