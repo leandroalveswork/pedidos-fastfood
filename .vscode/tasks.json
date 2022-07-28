@@ -36,6 +36,18 @@
                 "${workspaceFolder}/PedidosMvc/PedidosMvc.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "buildvb",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/PedidosWPF/PedidosWPF.vbproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }

@@ -14,3 +14,23 @@ PedidosMvc/*/bld/
 PedidosMvc/*/[Bb]in/
 PedidosMvc/*/[Oo]bj/
 PedidosMvc/*/[Ll]og/
+
+
+
+### ASPNET-WPF
+
+
+
+# Build results
+PedidosWPF/*/[Dd]ebug/
+PedidosWPF/*/[Dd]ebugPublic/
+PedidosWPF/*/[Rr]elease/
+PedidosWPF/*/[Rr]eleases/
+PedidosWPF/*/x64/
+PedidosWPF/*/x86/
+PedidosWPF/*/bld/
+PedidosWPF/*/[Bb]in/
+PedidosWPF/*/[Oo]bj/
+PedidosWPF/*/[Ll]og/
+PedidosWPF/bin
+PedidosWPF/obj
