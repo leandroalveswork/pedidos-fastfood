@@ -3,9 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PedidosWPF"
+        xmlns:wpfprojt="clr-namespace:PedidosWPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type wpfprojt:HomeIndexViewModel}">
+            <wpfprojt:HomeIndexView />
+        </DataTemplate>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -19,16 +25,19 @@
         </Grid.RowDefinitions>
         <Border Background="#3a2f7a" Grid.ColumnSpan="4" />
         <Grid VerticalAlignment="Stretch" >
-            <Button Foreground="#ffffff" Content="Home" FontSize="14" Background="#3a2f7a" BorderBrush="#3a2f7a" />
+            <Button Foreground="#ffffff" Content="Home" FontSize="14" Background="#3a2f7a" BorderBrush="#3a2f7a" Click="{Binding Path = ModelDaUi.Click_NavHome}" />
         </Grid>
         <Grid VerticalAlignment="Stretch" Grid.Column="1" >
-            <Button Foreground="#ffffff" Content="Bebida" FontSize="14" Background="#3a2f7a" BorderBrush="#3a2f7a" />
+            <Button Foreground="#ffffff" Content="Bebida" FontSize="14" Background="#3a2f7a" BorderBrush="#3a2f7a" Click="{Binding Path = ModelDaUi.Click_NavBebida}" />
         </Grid>
         <Grid VerticalAlignment="Stretch" Grid.Column="2" >
-            <Button Foreground="#ffffff" Content="Lanche" FontSize="14" Background="#3a2f7a" BorderBrush="#3a2f7a" />
+            <Button Foreground="#ffffff" Content="Lanche" FontSize="14" Background="#3a2f7a" BorderBrush="#3a2f7a" Click="{Binding Path = ModelDaUi.Click_NavLanche}" />
         </Grid>
         <Grid VerticalAlignment="Stretch" Grid.Column="3" >
-            <Button Foreground="#ffffff" Content="Pedido" FontSize="14" Background="#3a2f7a" BorderBrush="#3a2f7a" />
+            <Button Foreground="#ffffff" Content="Pedido" FontSize="14" Background="#3a2f7a" BorderBrush="#3a2f7a" Click="{Binding Path = ModelDaUi.Click_NavPedido}" />
+        </Grid>
+        <Grid Grid.Row="1" Grid.ColumnSpan="4" >
+            <ContentControl Content="{Binding Path = ModelDaUi.ViewModelAtual}" />
         </Grid>
     </Grid>
 </Window>
